@@ -26,12 +26,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self updateButtons];
+
     self.urlTextField.keyboardType = UIKeyboardTypeURL;
     [self.urlTextField becomeFirstResponder];
 
 
-
-    // Do any additional setup after loading the view, typically from a nib.
 }
 - (IBAction)onBackButtonPressed:(UIButton *)sender {
 
@@ -50,6 +49,7 @@
     [self.webView stopLoading];
 
 }
+
 - (IBAction)onReloadButtonPressed:(UIButton *)sender {
 
     [self.webView reload];
@@ -57,12 +57,7 @@
 }
 
 
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
+//TextField Protocol Method
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
 
      NSString *urlString = textField.text;
@@ -88,14 +83,7 @@
 }
 
 
--(void)loadPage:(NSString *) urlString{
 
-    NSURL *url = [NSURL URLWithString:urlString];
-    NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
-    self.urlTextField.clearButtonMode = UITextFieldViewModeAlways;
-    [self.webView loadRequest:urlRequest];
-
-}
 
 - (IBAction)plusButtonPressed:(UIButton *)sender {
 
@@ -107,33 +95,54 @@
 
 }
 
+//WebView Protocol Method
 - (void)webViewDidStartLoad:(UIWebView *)webView{
 
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
         [self updateButtons];
 }
 
+//WebView Protocol Method
 - (void)webViewDidFinishLoad:(UIWebView *)webView
 {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 
     NSString *myString = [self.webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     NSLog(@"%@", myString);
-   [self updateButtons];
+    [self updateButtons];
+    [self updateAddress:[webView request]];
     self.navigationLabel.text = myString;
 }
 
+//WebView Protocol Method
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
 
+    [self updateAddress:request];
+    [self updateButtons];
+    return YES;
+}
+
+//Helper
+-(void)loadPage:(NSString *) urlString{
+
+    NSURL *url = [NSURL URLWithString:urlString];
+    NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
+    self.urlTextField.clearButtonMode = UITextFieldViewModeAlways;
+    [self.webView loadRequest:urlRequest];
+    
+}
+
+//Helper
+-(void) updateAddress:(NSURLRequest *) request
+{
     NSURL *aURL = [request mainDocumentURL];
     NSString *myString = [aURL absoluteString];
     NSLog(@"%@", myString);
     self.urlTextField.text = myString;
 
-    [self updateButtons];
-    return YES;
 }
 
+//Helper
 -(void) updateButtons{
 
     self.backButton.enabled = self.webView.canGoBack;
