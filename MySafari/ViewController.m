@@ -17,7 +17,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *navigationLabel;
 
 
-
 @end
 
 @implementation ViewController
@@ -26,10 +25,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self updateButtons];
+    self.urlTextField.keyboardType = UIKeyboardTypeURL;
     [self.urlTextField becomeFirstResponder];
-
-
-
 
 
 
@@ -94,6 +92,7 @@
 
     NSURL *url = [NSURL URLWithString:urlString];
     NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
+    self.urlTextField.clearButtonMode = UITextFieldViewModeAlways;
     [self.webView loadRequest:urlRequest];
 
 }
@@ -111,44 +110,35 @@
 - (void)webViewDidStartLoad:(UIWebView *)webView{
 
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        [self updateButtons];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView
 {
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 
-        if(self.webView.canGoBack)
-        {
-            self.backButton.hidden = NO;
-        }
-        if(self.webView.canGoForward)
-        {
-            self.forwardButton.hidden = NO;
-        }
-
     NSString *myString = [self.webView stringByEvaluatingJavaScriptFromString:@"document.title"];
     NSLog(@"%@", myString);
+   [self updateButtons];
     self.navigationLabel.text = myString;
-
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType{
 
-    NSURL *aURL = [request URL];
+    NSURL *aURL = [request mainDocumentURL];
     NSString *myString = [aURL absoluteString];
     NSLog(@"%@", myString);
     self.urlTextField.text = myString;
 
-
-
-
-
+    [self updateButtons];
     return YES;
 }
 
+-(void) updateButtons{
 
-
-
+    self.backButton.enabled = self.webView.canGoBack;
+    self.forwardButton.enabled = self.webView.canGoForward;
+}
 
 
 
